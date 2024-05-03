@@ -7,6 +7,7 @@ fn main() {
     println!("255");
 
     for j in 0..image_height {
+        eprintln!("Lines remaining: {rem_lines}", rem_lines = image_height - j);
         for i in 0..image_width {
             let r = f64::from(i) / f64::from(image_width - 1);
             let g = f64::from(j) / f64::from(image_height - 1);
@@ -19,4 +20,5 @@ fn main() {
             println!("{ir} {ig} {ib}");
         }
     }
+    eprintln!("Done");
 }
