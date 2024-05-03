@@ -1,3 +1,8 @@
+use crate::{color::Color, position::Position};
+
+mod color;
+mod position;
+
 fn main() {
     let image_width = 256;
     let image_height = 256;
@@ -13,11 +18,9 @@ fn main() {
             let g = f64::from(j) / f64::from(image_height - 1);
             let b = 0f64;
 
-            let ir = (r * 255.999).trunc() as i64;
-            let ig = (g * 255.999).trunc() as i64;
-            let ib = (b * 255.999).trunc() as i64;
+            let c = Color::from(Position::new(r, g, b));
 
-            println!("{ir} {ig} {ib}");
+            println!("{c}");
         }
     }
     eprintln!("Done");
