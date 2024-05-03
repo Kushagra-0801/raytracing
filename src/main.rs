@@ -2,6 +2,7 @@ use crate::{color::Color, position::Position};
 
 mod color;
 mod position;
+mod ray;
 
 fn main() {
     let image_width = 256;
