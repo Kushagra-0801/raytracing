@@ -124,6 +124,20 @@ impl std::ops::AddAssign for Position {
     }
 }
 
+impl std::ops::Sub for Position {
+    type Output = Self;
+
+    fn sub(self, v: Self) -> Self::Output {
+        Self::new(self.x() - v.x(), self.y() - v.y(), self.z() - v.z())
+    }
+}
+
+impl std::ops::SubAssign for Position {
+    fn sub_assign(&mut self, v: Self) {
+        *self = self.clone() - v
+    }
+}
+
 impl std::ops::Mul<f64> for Position {
     type Output = Self;
 

@@ -8,9 +8,8 @@ pub struct Ray {
 
 impl Ray {
     pub fn new(origin: Position, direction: Position) -> Self {
-        assert_eq!(
-            direction.length(),
-            1.0,
+        assert!(
+            (direction.length() - 1.0).abs() <= 0.0001,
             "Direction needs to be a unit vector"
         );
         Self { origin, direction }
