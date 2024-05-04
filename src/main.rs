@@ -47,19 +47,25 @@ fn main() {
 }
 
 fn ray_color(r: Ray) -> Color {
-    if hit_sphere(Position::new(0.0, 0.0, -2.0), 1.0, r) {
-        return Color::new(255, 0, 0);
+    let circle_center = Position::new(0.0, 0.0, -2.0);
+    let t = hit_sphere(circle_center, 1.0, r);
+    if t >= 0.0 {
+        let n = (r.at(t) - circle_center).unit();
+        return Color::from(0.5 * Position::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0));
     }
     let a = 0.5 * (r.direction().y() + 1.0);
     Color::from((1.0 - a) * Position::new(1.0, 1.0, 1.0) + a * Position::new(0.5, 0.7, 1.0))
 }
 
-fn hit_sphere(center: Position, radius: f64, r: Ray) -> bool {
+fn hit_sphere(center: Position, radius: f64, r: Ray) -> f64 {
     let oc = center - r.origin();
     let a = r.direction().dot(r.direction());
     let b = -2.0 * r.direction().dot(oc);
     let c = oc.dot(oc) - radius.powi(2);
     let discriminant = b.powi(2) - 4.0 * a * c;
-    let ray_hit_sphere = discriminant >= 0.0;
-    ray_hit_sphere
+    if discriminant < 0.0 {
+        -1.0
+    } else {
+        (-b - discriminant.sqrt()) / (2.0 * a)
+    }
 }
