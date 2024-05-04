@@ -15,6 +15,7 @@ impl Ray {
         Self { origin, direction }
     }
 
+    #[allow(dead_code)]
     pub fn at(self, t: f64) -> Position {
         self.origin + t * self.direction
     }
