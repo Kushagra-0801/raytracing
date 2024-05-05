@@ -1,6 +1,9 @@
+use hittable::{Hittable, Sphere};
+
 use crate::{color::Color, position::Position, ray::Ray};
 
 mod color;
+mod hittable;
 mod position;
 mod ray;
 
@@ -38,7 +41,8 @@ fn main() {
             let ray_direction = pixel_center - camera_center;
             let ray = Ray::new(camera_center, ray_direction.unit());
 
-            let pixel_color = ray_color(ray);
+            let sphere = Sphere::new(Position::new(0.0, 0.0, -2.0), 1.0);
+            let pixel_color = ray_color(ray, sphere);
 
             println!("{pixel_color}");
         }
@@ -46,26 +50,11 @@ fn main() {
     eprintln!("Done");
 }
 
-fn ray_color(r: Ray) -> Color {
-    let circle_center = Position::new(0.0, 0.0, -2.0);
-    let t = hit_sphere(circle_center, 1.0, r);
-    if t >= 0.0 {
-        let n = (r.at(t) - circle_center).unit();
-        return Color::from(0.5 * Position::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0));
+fn ray_color(r: Ray, s: Sphere) -> Color {
+    let hit_sphere = s.hit(r, f64::MIN..=f64::MAX);
+    if let Some(rec) = hit_sphere {
+        return Color::from(0.5 * Position::new(rec.n.x() + 1.0, rec.n.y() + 1.0, rec.n.z() + 1.0));
     }
     let a = 0.5 * (r.direction().y() + 1.0);
     Color::from((1.0 - a) * Position::new(1.0, 1.0, 1.0) + a * Position::new(0.5, 0.7, 1.0))
-}
-
-fn hit_sphere(center: Position, radius: f64, r: Ray) -> f64 {
-    let oc = center - r.origin();
-    let a = r.direction().length_squared();
-    let h = r.direction().dot(oc);
-    let c = oc.length_squared() - radius.powi(2);
-    let discriminant = h.powi(2) - a * c;
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (h - discriminant.sqrt()) / (a)
-    }
 }
