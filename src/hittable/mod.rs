@@ -9,11 +9,18 @@ pub trait Hittable {
     fn hit(&self, r: Ray, valid_t_range: RangeInclusive<f64>) -> Option<HitRecord>;
 }
 
-#[derive(Debug, Default, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum FaceSide {
+    Inward,
+    Outward,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HitRecord {
     pub p: Position,
     pub n: Position,
     pub t: f64,
+    pub face: FaceSide,
 }
 
 impl<T: Hittable> Hittable for Vec<T> {

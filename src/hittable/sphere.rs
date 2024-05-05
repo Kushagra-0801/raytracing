@@ -1,6 +1,6 @@
 use crate::{position::Position, ray::Ray};
 
-use super::{HitRecord, Hittable};
+use super::{FaceSide, HitRecord, Hittable};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct Sphere {
@@ -28,16 +28,30 @@ impl Hittable for Sphere {
         let root1 = (h - d) / a;
         let root2 = (h + d) / a;
         if valid_t_range.contains(&root1) {
+            let out_normal = (r.at(root1) - self.center) / self.radius;
+            let (face, opp_normal) = if out_normal.dot(r.direction()) < 0.0 {
+                (FaceSide::Outward, out_normal)
+            } else {
+                (FaceSide::Inward, -out_normal)
+            };
             Some(HitRecord {
                 p: r.at(root1),
-                n: (r.at(root1) - self.center) / self.radius,
+                n: opp_normal,
                 t: root1,
+                face,
             })
         } else if valid_t_range.contains(&root2) {
+            let out_normal = (r.at(root2) - self.center) / self.radius;
+            let (face, opp_normal) = if out_normal.dot(r.direction()) < 0.0 {
+                (FaceSide::Outward, out_normal)
+            } else {
+                (FaceSide::Inward, -out_normal)
+            };
             Some(HitRecord {
                 p: r.at(root2),
-                n: (r.at(root2) - self.center) / self.radius,
+                n: opp_normal,
                 t: root2,
+                face,
             })
         } else {
             None
