@@ -41,9 +41,9 @@ fn main() {
             let ray_direction = pixel_center - camera_center;
             let ray = Ray::new(camera_center, ray_direction.unit());
 
-            let sphere_left = Sphere::new(Position::new(-0.5, 0.0, -2.0), 1.1);
-            let sphere_right = Sphere::new(Position::new(0.5, 0.0, -2.0), 1.0);
-            let pixel_color = ray_color(ray, vec![sphere_left, sphere_right]);
+            let ball = Sphere::new(Position::new(0.0, 0.0, -1.0), 0.5);
+            let ground = Sphere::new(Position::new(0.0, -100.5, -1.0), 100.0);
+            let pixel_color = ray_color(ray, vec![ball, ground]);
 
             println!("{pixel_color}");
         }
@@ -54,7 +54,7 @@ fn main() {
 fn ray_color(r: Ray, hs: impl Hittable) -> Color {
     let ray_hit = hs.hit(r, 0.0..=f64::MAX);
     if let Some(rec) = ray_hit {
-        return Color::from(0.5 * Position::new(rec.n.x() + 1.0, rec.n.y() + 1.0, rec.n.z() + 1.0));
+        return Color::from(0.5 * (rec.n + Position::new(1.0, 1.0, 1.0)));
     }
     let a = 0.5 * (r.direction().y() + 1.0);
     Color::from((1.0 - a) * Position::new(1.0, 1.0, 1.0) + a * Position::new(0.5, 0.7, 1.0))
