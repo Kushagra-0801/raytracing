@@ -37,3 +37,9 @@ impl<T: Hittable> Hittable for Vec<T> {
             .last()
     }
 }
+
+impl<T: Hittable> Hittable for &T {
+    fn hit(&self, r: Ray, valid_t_range: RangeInclusive<f64>) -> Option<HitRecord> {
+        (*self).hit(r, valid_t_range)
+    }
+}
