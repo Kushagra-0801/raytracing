@@ -52,7 +52,7 @@ fn main() {
 }
 
 fn ray_color(r: Ray, hs: impl Hittable) -> Color {
-    let ray_hit = hs.hit(r, f64::MIN..=f64::MAX);
+    let ray_hit = hs.hit(r, 0.0..=f64::MAX);
     if let Some(rec) = ray_hit {
         return Color::from(0.5 * Position::new(rec.n.x() + 1.0, rec.n.y() + 1.0, rec.n.z() + 1.0));
     }
