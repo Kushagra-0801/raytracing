@@ -25,8 +25,15 @@ pub struct HitRecord {
 
 impl<T: Hittable> Hittable for Vec<T> {
     fn hit(&self, r: Ray, valid_t_range: RangeInclusive<f64>) -> Option<HitRecord> {
+        let mut narrowed_range = valid_t_range;
         self.iter()
-            .flat_map(|h| h.hit(r, valid_t_range.clone()))
-            .min_by(|hr1, hr2| hr1.t.partial_cmp(&hr2.t).unwrap())
+            .flat_map(|h| {
+                h.hit(r, narrowed_range.clone()).inspect(|hr| {
+                    let start = *narrowed_range.start();
+                    let end = hr.t.min(*narrowed_range.end());
+                    narrowed_range = start..=end;
+                })
+            })
+            .last()
     }
 }
