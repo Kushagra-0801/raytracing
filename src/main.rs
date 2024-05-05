@@ -6,6 +6,7 @@ mod color;
 mod hittable;
 mod position;
 mod ray;
+mod util;
 
 fn main() {
     let aspect_ratio = 16.0 / 9.0;

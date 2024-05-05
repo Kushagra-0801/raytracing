@@ -1,4 +1,4 @@
-use crate::{position::Position, ray::Ray};
+use crate::{position::Position, ray::Ray, util::RangeSurround};
 
 use super::{FaceSide, HitRecord, Hittable};
 
@@ -27,7 +27,7 @@ impl Hittable for Sphere {
         let d = discriminant.sqrt();
         let root1 = (h - d) / a;
         let root2 = (h + d) / a;
-        if valid_t_range.contains(&root1) {
+        if valid_t_range.surrounds(&root1) {
             let out_normal = (r.at(root1) - self.center) / self.radius;
             let (face, opp_normal) = if out_normal.dot(r.direction()) < 0.0 {
                 (FaceSide::Outward, out_normal)
@@ -40,7 +40,7 @@ impl Hittable for Sphere {
                 t: root1,
                 face,
             })
-        } else if valid_t_range.contains(&root2) {
+        } else if valid_t_range.surrounds(&root2) {
             let out_normal = (r.at(root2) - self.center) / self.radius;
             let (face, opp_normal) = if out_normal.dot(r.direction()) < 0.0 {
                 (FaceSide::Outward, out_normal)
