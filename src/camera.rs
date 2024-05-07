@@ -1,6 +1,7 @@
 use crate::{color::Color, hittable::Hittable, interval::Interval, position::Position, ray::Ray};
 
 use paste::paste;
+use rand::Rng;
 
 #[derive(Debug, Clone, Copy)]
 pub struct CameraOptions {
@@ -9,6 +10,7 @@ pub struct CameraOptions {
     focal_length: f64,
     viewport_height: f64,
     camera_center: Position,
+    samples_per_pixel: i32,
 }
 
 impl Default for CameraOptions {
@@ -19,6 +21,7 @@ impl Default for CameraOptions {
             focal_length: 1.0,
             viewport_height: 2.0,
             camera_center: Position::new(0.0, 0.0, 0.0),
+            samples_per_pixel: 10,
         }
     }
 }
@@ -27,6 +30,7 @@ macro_rules! with_field {
     ($($field: ident : $type: ty)+) => {
         paste! {
             $(
+                #[allow(dead_code)]
                 pub fn [<with_ $field>](mut self, v: $type) -> Self {
                     self.$field = v;
                     self
@@ -43,6 +47,7 @@ impl CameraOptions {
         focal_length: f64
         viewport_height: f64
         camera_center: Position
+        samples_per_pixel: i32
     }
 }
 
@@ -54,6 +59,7 @@ pub struct Camera {
     pixel00_loc: Position,
     pixel_delta_u: Position,
     pixel_delta_v: Position,
+    samples_per_pixel: i32,
 }
 
 impl Camera {
@@ -79,6 +85,8 @@ impl Camera {
             - viewport_v / 2.0;
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
+        let samples_per_pixel = options.samples_per_pixel;
+
         Self {
             image_width,
             image_height,
@@ -86,6 +94,7 @@ impl Camera {
             pixel00_loc,
             pixel_delta_u,
             pixel_delta_v,
+            samples_per_pixel,
         }
     }
 
@@ -103,13 +112,17 @@ impl Camera {
                 rem_lines = self.image_height - j
             );
             for i in 0..self.image_width {
-                let pixel_center = self.pixel00_loc
-                    + (f64::from(i) * self.pixel_delta_u)
-                    + (f64::from(j) * self.pixel_delta_v);
-                let ray_direction = pixel_center - self.center;
-                let ray = Ray::new(self.center, ray_direction.unit());
+                let rays = (0..self.samples_per_pixel).map(|_| {
+                    let offset_x = rand::thread_rng().gen_range(-0.5..=0.5);
+                    let offset_y = rand::thread_rng().gen_range(-0.5..=0.5);
+                    let pixel_center = self.pixel00_loc
+                        + ((f64::from(i) + offset_x) * self.pixel_delta_u)
+                        + ((f64::from(j) + offset_y) * self.pixel_delta_v);
+                    let ray_direction = pixel_center - self.center;
+                    Ray::new(self.center, ray_direction.unit())
+                });
 
-                let pixel_color = self.ray_color(ray, &world);
+                let pixel_color = self.avg_ray_color(rays, &world);
 
                 println!("{pixel_color}");
             }
@@ -117,7 +130,7 @@ impl Camera {
         eprintln!("Done");
     }
 
-    fn ray_color(&self, r: Ray, world: impl Hittable) -> Color {
+    fn ray_color_intensity(r: Ray, world: impl Hittable) -> Position {
         let ray_hit = world.hit(
             r,
             Interval {
@@ -126,9 +139,25 @@ impl Camera {
             },
         );
         if let Some(rec) = ray_hit {
-            return Color::from(0.5 * (rec.n + Position::new(1.0, 1.0, 1.0)));
+            0.5 * (rec.n + Position::new(1.0, 1.0, 1.0))
+        } else {
+            let a = 0.5 * (r.direction().y() + 1.0);
+            (1.0 - a) * Position::new(1.0, 1.0, 1.0) + a * Position::new(0.5, 0.7, 1.0)
         }
-        let a = 0.5 * (r.direction().y() + 1.0);
-        Color::from((1.0 - a) * Position::new(1.0, 1.0, 1.0) + a * Position::new(0.5, 0.7, 1.0))
+    }
+
+    #[allow(dead_code)]
+    fn ray_color(&self, r: Ray, world: impl Hittable) -> Color {
+        Color::from(Self::ray_color_intensity(r, world))
+    }
+
+    fn avg_ray_color(&self, rs: impl Iterator<Item = Ray>, world: impl Hittable + Copy) -> Color {
+        let mut rays = 0;
+        let total_intensity: Position = rs
+            .inspect(|_| rays += 1)
+            .map(|r| Self::ray_color_intensity(r, world))
+            .sum();
+        let avg_intensity = total_intensity / f64::from(rays.max(1));
+        Color::from(avg_intensity)
     }
 }

@@ -1,4 +1,7 @@
-use std::fmt::{Debug, Display};
+use std::{
+    fmt::{Debug, Display},
+    iter::Sum,
+};
 
 use paste::paste;
 
@@ -171,5 +174,11 @@ impl std::ops::Div<f64> for Position {
 impl std::ops::DivAssign<f64> for Position {
     fn div_assign(&mut self, t: f64) {
         *self = self.clone() * (1.0 / t)
+    }
+}
+
+impl Sum for Position {
+    fn sum<I: Iterator<Item = Self>>(iter: I) -> Self {
+        iter.reduce(|acc, p| acc + p).unwrap_or_default()
     }
 }
