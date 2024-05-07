@@ -1,4 +1,4 @@
-use crate::{color::Color, hittable::Hittable, position::Position, ray::Ray};
+use crate::{color::Color, hittable::Hittable, interval::Interval, position::Position, ray::Ray};
 
 use paste::paste;
 
@@ -118,7 +118,13 @@ impl Camera {
     }
 
     fn ray_color(&self, r: Ray, world: impl Hittable) -> Color {
-        let ray_hit = world.hit(r, 0.0..=f64::INFINITY);
+        let ray_hit = world.hit(
+            r,
+            Interval {
+                start: 0.0,
+                end: f64::INFINITY,
+            },
+        );
         if let Some(rec) = ray_hit {
             return Color::from(0.5 * (rec.n + Position::new(1.0, 1.0, 1.0)));
         }

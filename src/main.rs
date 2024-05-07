@@ -5,9 +5,9 @@ use position::Position;
 mod camera;
 mod color;
 mod hittable;
+mod interval;
 mod position;
 mod ray;
-mod util;
 
 fn main() {
     let ball = Sphere::new(Position::new(0.0, 0.0, -1.0), 0.5);
