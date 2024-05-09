@@ -143,7 +143,7 @@ impl Camera {
         let ray_hit = world.hit(
             r,
             Interval {
-                start: 0.0,
+                start: 0.0005,
                 end: f64::INFINITY,
             },
         );
