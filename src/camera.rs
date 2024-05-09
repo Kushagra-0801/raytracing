@@ -139,7 +139,7 @@ impl Camera {
             },
         );
         if let Some(rec) = ray_hit {
-            0.5 * (rec.n + Position::new(1.0, 1.0, 1.0))
+            0.5 * (rec.normal_vector + Position::new(1.0, 1.0, 1.0))
         } else {
             let a = 0.5 * (r.direction().y() + 1.0);
             (1.0 - a) * Position::new(1.0, 1.0, 1.0) + a * Position::new(0.5, 0.7, 1.0)

@@ -35,8 +35,8 @@ impl Hittable for Sphere {
                 (FaceSide::Inward, -out_normal)
             };
             Some(HitRecord {
-                p: r.at(root1),
-                n: opp_normal,
+                incidence_point: r.at(root1),
+                normal_vector: opp_normal,
                 t: root1,
                 face,
             })
@@ -48,8 +48,8 @@ impl Hittable for Sphere {
                 (FaceSide::Inward, -out_normal)
             };
             Some(HitRecord {
-                p: r.at(root2),
-                n: opp_normal,
+                incidence_point: r.at(root2),
+                normal_vector: opp_normal,
                 t: root2,
                 face,
             })

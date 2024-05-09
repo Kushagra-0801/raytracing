@@ -15,8 +15,8 @@ pub enum FaceSide {
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HitRecord {
-    pub p: Position,
-    pub n: Position,
+    pub incidence_point: Position,
+    pub normal_vector: Position,
     pub t: f64,
     pub face: FaceSide,
 }
