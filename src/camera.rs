@@ -11,6 +11,7 @@ pub struct CameraOptions {
     viewport_height: f64,
     camera_center: Position,
     samples_per_pixel: i32,
+    max_bounces: i32,
 }
 
 impl Default for CameraOptions {
@@ -22,6 +23,7 @@ impl Default for CameraOptions {
             viewport_height: 2.0,
             camera_center: Position::new(0.0, 0.0, 0.0),
             samples_per_pixel: 10,
+            max_bounces: 10,
         }
     }
 }
@@ -48,6 +50,7 @@ impl CameraOptions {
         viewport_height: f64
         camera_center: Position
         samples_per_pixel: i32
+        max_bounces: i32
     }
 }
 
@@ -60,6 +63,7 @@ pub struct Camera {
     pixel_delta_u: Position,
     pixel_delta_v: Position,
     samples_per_pixel: i32,
+    max_bounces: i32,
 }
 
 impl Camera {
@@ -86,6 +90,7 @@ impl Camera {
         let pixel00_loc = viewport_upper_left + 0.5 * (pixel_delta_u + pixel_delta_v);
 
         let samples_per_pixel = options.samples_per_pixel;
+        let max_bounces = options.max_bounces;
 
         Self {
             image_width,
@@ -95,6 +100,7 @@ impl Camera {
             pixel_delta_u,
             pixel_delta_v,
             samples_per_pixel,
+            max_bounces,
         }
     }
 
@@ -130,7 +136,10 @@ impl Camera {
         eprintln!("Done");
     }
 
-    fn ray_color_intensity(r: Ray, world: impl Hittable) -> Position {
+    fn ray_color_intensity(r: Ray, bounces_left: i32, world: impl Hittable) -> Position {
+        if bounces_left <= 0 {
+            return Position::default();
+        }
         let ray_hit = world.hit(
             r,
             Interval {
@@ -141,7 +150,7 @@ impl Camera {
         if let Some(rec) = ray_hit {
             let reflection_direction = Self::reflect_ray(r, rec.normal_vector, 1.0);
             let reflected_ray = Ray::new(rec.incidence_point, reflection_direction);
-            0.5 * Self::ray_color_intensity(reflected_ray, world)
+            0.5 * Self::ray_color_intensity(reflected_ray, bounces_left - 1, world)
         } else {
             let a = 0.5 * (r.direction().y() + 1.0);
             (1.0 - a) * Position::new(1.0, 1.0, 1.0) + a * Position::new(0.5, 0.7, 1.0)
@@ -150,14 +159,14 @@ impl Camera {
 
     #[allow(dead_code)]
     fn ray_color(&self, r: Ray, world: impl Hittable) -> Color {
-        Color::from(Self::ray_color_intensity(r, world))
+        Color::from(Self::ray_color_intensity(r, self.max_bounces, world))
     }
 
     fn avg_ray_color(&self, rs: impl Iterator<Item = Ray>, world: impl Hittable + Copy) -> Color {
         let mut rays = 0;
         let total_intensity: Position = rs
             .inspect(|_| rays += 1)
-            .map(|r| Self::ray_color_intensity(r, world))
+            .map(|r| Self::ray_color_intensity(r, self.max_bounces, world))
             .sum();
         let avg_intensity = total_intensity / f64::from(rays.max(1));
         Color::from(avg_intensity)

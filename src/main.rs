@@ -19,7 +19,8 @@ fn main() {
         .with_camera_center(Position::new(0.0, 0.0, 0.0))
         .with_focal_length(1.0)
         .with_image_width(400)
-        .with_viewport_height(2.0);
+        .with_viewport_height(2.0)
+        .with_max_bounces(20);
     let camera = Camera::new(camera_options);
 
     camera.render(world);
