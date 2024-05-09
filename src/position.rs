@@ -4,6 +4,7 @@ use std::{
 };
 
 use paste::paste;
+use rand::{thread_rng, Rng};
 
 #[repr(transparent)]
 #[derive(Default, Clone, Copy, PartialEq)]
@@ -48,6 +49,19 @@ macro_rules! xyz {
 impl Position {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Self { e: [x, y, z] }
+    }
+
+    pub fn random(min: f64, max: f64) -> Self {
+        Self::new(
+            thread_rng().gen_range(min..=max),
+            thread_rng().gen_range(min..=max),
+            thread_rng().gen_range(min..=max),
+        )
+    }
+
+    pub fn random_on_unit_sphere() -> Self {
+        let p = Self::random(-1.0, 1.0);
+        return p.unit();
     }
 
     xyz! {
