@@ -143,12 +143,12 @@ impl Camera {
         let ray_hit = world.hit(
             r,
             Interval {
-                start: 0.0005,
+                start: 0.001,
                 end: f64::INFINITY,
             },
         );
         if let Some(rec) = ray_hit {
-            let reflection_direction = Self::reflect_ray(r, rec.normal_vector, 1.0);
+            let reflection_direction = Self::reflect_ray_diffuse(r, rec.normal_vector);
             let reflected_ray = Ray::new(rec.incidence_point, reflection_direction);
             0.5 * Self::ray_color_intensity(reflected_ray, bounces_left - 1, world)
         } else {
@@ -172,17 +172,14 @@ impl Camera {
         Color::from(avg_intensity)
     }
 
-    fn reflect_ray(incident_ray: Ray, surface_normal: Position, spread: f64) -> Position {
+    fn reflect_ray_diffuse(incident_ray: Ray, surface_normal: Position) -> Position {
         let _ = incident_ray;
-        // Let's fix the spread to 1.0 for now since we are only implementing matte materials
-        if spread != 1.0 {
-            todo!("Smoother materials are not yet implemented")
-        }
         let rand_vec = Position::random_on_unit_sphere();
-        if surface_normal.dot(rand_vec) > 0.0 {
+        let rand_vec = if surface_normal.dot(rand_vec) > 0.0 {
             rand_vec
         } else {
             -rand_vec
-        }
+        };
+        (surface_normal + rand_vec).unit()
     }
 }
