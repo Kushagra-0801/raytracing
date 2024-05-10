@@ -50,6 +50,26 @@ impl Color {
         Self { c: [r, g, b] }
     }
 
+    pub fn with_gamma_correction(intensity: Position) -> Self {
+        assert!(
+            0.0 <= intensity.x() && intensity.x() <= 1.0,
+            "Red component of color is out of range"
+        );
+        assert!(
+            0.0 <= intensity.y() && intensity.y() <= 1.0,
+            "Green component of color is out of range"
+        );
+        assert!(
+            0.0 <= intensity.z() && intensity.z() <= 1.0,
+            "Blue component of color is out of range"
+        );
+        Self::new(
+            (intensity.x().sqrt() * 255.999).trunc() as i32,
+            (intensity.y().sqrt() * 255.999).trunc() as i32,
+            (intensity.z().sqrt() * 255.999).trunc() as i32,
+        )
+    }
+
     rgb! {
         r => 0
         g => 1

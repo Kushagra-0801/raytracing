@@ -150,7 +150,7 @@ impl Camera {
         if let Some(rec) = ray_hit {
             let reflection_direction = Self::reflect_ray_diffuse(r, rec.normal_vector);
             let reflected_ray = Ray::new(rec.incidence_point, reflection_direction);
-            0.5 * Self::ray_color_intensity(reflected_ray, bounces_left - 1, world)
+            0.2 * Self::ray_color_intensity(reflected_ray, bounces_left - 1, world)
         } else {
             let a = 0.5 * (r.direction().y() + 1.0);
             (1.0 - a) * Position::new(1.0, 1.0, 1.0) + a * Position::new(0.5, 0.7, 1.0)
@@ -159,7 +159,7 @@ impl Camera {
 
     #[allow(dead_code)]
     fn ray_color(&self, r: Ray, world: impl Hittable) -> Color {
-        Color::from(Self::ray_color_intensity(r, self.max_bounces, world))
+        Color::with_gamma_correction(Self::ray_color_intensity(r, self.max_bounces, world))
     }
 
     fn avg_ray_color(&self, rs: impl Iterator<Item = Ray>, world: impl Hittable + Copy) -> Color {
@@ -169,7 +169,7 @@ impl Camera {
             .map(|r| Self::ray_color_intensity(r, self.max_bounces, world))
             .sum();
         let avg_intensity = total_intensity / f64::from(rays.max(1));
-        Color::from(avg_intensity)
+        Color::with_gamma_correction(avg_intensity)
     }
 
     fn reflect_ray_diffuse(incident_ray: Ray, surface_normal: Position) -> Position {
