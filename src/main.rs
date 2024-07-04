@@ -6,6 +6,7 @@ mod camera;
 mod color;
 mod hittable;
 mod interval;
+mod material;
 mod position;
 mod ray;
 

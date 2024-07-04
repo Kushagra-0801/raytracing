@@ -39,6 +39,7 @@ impl Hittable for Sphere {
                 normal_vector: opp_normal,
                 t: root1,
                 face,
+                material: todo!(),
             })
         } else if valid_t_range.surrounds(root2) {
             let out_normal = (r.at(root2) - self.center) / self.radius;
@@ -52,6 +53,7 @@ impl Hittable for Sphere {
                 normal_vector: opp_normal,
                 t: root2,
                 face,
+                material: todo!(),
             })
         } else {
             None

@@ -1,4 +1,6 @@
-use crate::{interval::Interval, position::Position, ray::Ray};
+use std::{fmt::Debug, rc::Rc};
+
+use crate::{interval::Interval, material::Material, position::Position, ray::Ray};
 
 mod sphere;
 pub use sphere::Sphere;
@@ -13,12 +15,24 @@ pub enum FaceSide {
     Outward,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone)]
 pub struct HitRecord {
     pub incidence_point: Position,
     pub normal_vector: Position,
     pub t: f64,
     pub face: FaceSide,
+    pub material: Rc<dyn Material>,
+}
+
+impl Debug for HitRecord {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("HitRecord")
+            .field("incidence_point", &self.incidence_point)
+            .field("normal_vector", &self.normal_vector)
+            .field("t", &self.t)
+            .field("face", &self.face)
+            .finish()
+    }
 }
 
 impl<T: Hittable> Hittable for Vec<T> {
